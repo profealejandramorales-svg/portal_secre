@@ -49,7 +49,7 @@
             #print-zone, #print-zone * {
                 visibility: visible !important;
                 display: block !important;
-                -webkit-print-color-adjust: exact; /* Fuerza impresión de colores e imágenes */
+                -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact;
             }
             #print-zone {
@@ -62,7 +62,6 @@
                 background: white;
             }
             
-            /* Asegurar que las imágenes (logo) se vean */
             img { display: block !important; visibility: visible !important; }
 
             .no-print { display: none !important; }
@@ -81,7 +80,6 @@
             .doc-signatures { display: flex; justify-content: space-between; margin-top: 80px; page-break-inside: avoid; }
             .doc-sign-line { width: 40%; border-top: 1px solid black; text-align: center; font-weight: bold; padding-top: 5px; font-size: 10pt; }
             
-            /* Tablas de Tutoría para Impresión */
             table.print-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 10pt; }
             table.print-table th, table.print-table td { border: 1px solid black; padding: 5px; text-align: left; vertical-align: top; }
             table.print-table th { background-color: #eee !important; -webkit-print-color-adjust: exact; font-weight: bold; text-align: center; }
@@ -93,7 +91,7 @@
     <header class="bg-green-800 text-white shadow-lg no-print sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <img src="logo.jpg" alt="Logo" class="h-12 bg-white rounded p-1">
+                <img src="logo.jpg" alt="Logo" class="h-12 bg-white rounded p-1" onerror="this.style.display='none'">
                 <div>
                     <h1 class="text-lg font-bold">Gestión Decreto 67</h1>
                     <p class="text-green-200 text-xs">Informe Avance Tutoría-Repitencia • Desarrollado por ProfeAle</p>
@@ -114,7 +112,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">1. Curso</label>
-                    <select id="course-select" class="w-full p-2 border rounded bg-gray-50" onchange="filterStudents()">
+                    <select id="course-select" class="w-full p-2 border rounded bg-gray-50 font-bold text-gray-700" onchange="filterStudents()">
                         <option value="">Cargando nómina...</option>
                     </select>
                 </div>
@@ -265,7 +263,7 @@
                             
                             <div class="flex justify-between border-b-2 border-black pb-2 mb-4">
                                 <div class="flex items-center gap-4">
-                                    <img src="logo.jpg" alt="Logo Colegio" style="height: 60px; width: auto; object-fit: contain;">
+                                    <img src="logo.jpg" alt="Logo Colegio" style="height: 60px; width: auto; object-fit: contain;" onerror="this.style.display='none'">
                                     <div class="text-left">
                                         <h2 class="font-bold text-lg uppercase leading-tight">Escuela Agrícola<br>Sagrados Corazones</h2>
                                         <p class="text-xs italic">Unidad Técnico Pedagógica</p>
@@ -338,9 +336,9 @@
 
             <div id="tab-historial" class="view-section hidden">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-800">🗂️ Informes Guardados (Base de Datos 2025)</h3>
+                    <h3 class="text-lg font-bold text-gray-800">🗂️ Informes Guardados</h3>
                     <button onclick="loadHistory()" class="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 border border-blue-200">
-                        🔄 Cargar Historial Antiguo
+                        🔄 Cargar Historial
                     </button>
                 </div>
                 <div class="overflow-x-auto border rounded-lg">
@@ -355,7 +353,7 @@
                             </tr>
                         </thead>
                         <tbody id="history-body">
-                            <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Presiona "Cargar Historial Antiguo" para ver los datos.</td></tr>
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Presiona "Cargar Historial" para ver los datos.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -367,7 +365,7 @@
     <div id="print-zone" class="hidden"></div>
 
     <script>
-        // === 1. CONFIGURACIÓN FIREBASE ANTIGUA (TUS DATOS 2025) - INTACTA ===
+        // === 1. CONFIGURACIÓN FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyAisxzJVm2OzjYEXSi4Q7HxZEUG_aarQwo",
             authDomain: "notas-liceo-agricola-sscc.firebaseapp.com",
@@ -381,10 +379,14 @@
         const SCHOOL_NAME = "Escuela Agrícola Sagrados Corazones"; 
         const LOCATION = "Villa Alegre";
 
-        // NÓMINA 2025 (Misma lista que enviaste)
-        const STUDENTS_2025 = [
-            ['2A', '23376817-0', 'EMILYA ANTONIA', 'ALBURQUENQUE DEL GRECO'], ['2A', '22922460-3', 'BENJAMÍN NICOLÁS', 'ANABALÓN BELTRÁN'], ['2A', '23355953-9', 'HADEEY ALEJANDRA', 'CONTRERAS SALGADO'], ['2A', '23560082-K', 'AGUSTÍN ALEXIS', 'FERRADA ALBORNOZ'], ['2A', '23644472-4', 'FERNANDA MAGDALENA', 'IBÁÑEZ GONZÁLEZ'], ['2A', '23389072-3', 'ALEXANDRA DANAE', 'LAGOS LASTRA'], ['2A', '23498596-5', 'LUCIANO ANTONIO', 'LÓPEZ LÓPEZ'], ['2A', '23396870-6', 'ANTONELLA BELÉN', 'MALDONADO FLORES'], ['2A', '22793858-7', 'IGNACIO ANTONIO', 'MARIN MARÍN'], ['2A', '23548214-2', 'VALESKA BELÉN', 'MONTECINO DÍAZ'], ['2A', '23366642-4', 'LUIS GABRIEL', 'MUÑOZ CONTRERAS'], ['2A', '23622121-0', 'ROGER JOEL', 'MUÑOZ LUNA'], ['2A', '23329866-2', 'KARLA PAZ', 'NAVARRO VILLANUEVA'], ['2A', '23388136-8', 'SEBASTIÁN ANDRÉS', 'ORELLANA ARRIAGADA'], ['2A', '23640108-1', 'FELIPE ALONSO', 'QUEZADA NARANJO'], ['2A', '23529637-3', 'FERNANDA FLORENCIA', 'QUINTEROS VERGARA'], ['2A', '23534317-7', 'DUVAN EMILIO', 'RAMÍREZ VILLALOBOS'], ['2A', '23679554-3', 'MARÍA JOSÉ', 'SANTANDER LÓPEZ'], ['2A', '23631475-8', 'JEANFRANCO PATRICK', 'TAPIA CASTILLA'], ['2A', '23007625-1', 'FRANCHESCA POULETTE', 'URBINA CÁCERES'], ['2A', '23584521-0', 'AMANDA ISABEL', 'VÁSQUEZ ZALDUENDO'], ['2A', '23404221-1', 'DAMIÁN ANDRÉS', 'ZABALAGA COFRÉ'], ['2A', '23461777-K', 'LUKAS ALFONSO', 'BAEZ DONOSO'], ['2A', '23032545-6', 'GONZALO IGNACIO', 'MESA DÍAZ'], ['2A', '23367234-3', 'NOEMÍ DE JESÚS DE LAS ESTRELLAS', 'ARAVENA ZÚÑIGA'], ['2A', '22826488-1', 'CRISTÓBAL ANTONIO', 'ASTUDILLO CAMPOS'], ['2A', '23251746-8', 'BRUNO FERNANDO LEÓN', 'ASTUDILLO VÁSQUEZ'], ['2A', '23545428-9', 'CATALINA ANDREA', 'CUMINAO VIDAL'], ['2A', '23224652-9', 'MIGUEL ALBERTO', 'DÍAZ MALUENDA'], ['2A', '23337375-3', 'DIDIER EZEQUIEL', 'KILTAN GONZÁLEZ'], ['2A', '23355954-7', 'MARCO EMILIO', 'LÓPEZ ACUÑA'], ['2A', '23153879-8', 'EYDAN DAMIÁN', 'LÓPEZ NOVOA'], ['2A', '20760552-2', 'FABIÁN FELIPE', 'MÉNDEZ SUAZO'], ['2A', '23391772-9', 'MATEO ANTONIO BENJAMÍN', 'MOYA REYES'], ['2A', '23432193-5', 'VALENTINA ABIGAIL', 'OSES CAMPOS'], ['2A', '23190411-5', 'ANTONELLA FRANCISCA', 'PALMA ORELLANA'], ['2A', '23605196-K', 'MONSERRAT ALAMIRA', 'PEREIRA ORELLANA'], ['2A', '23415461-3', 'ZADKA ALEJANDRA', 'PÉREZ ORMAZÁBAL'], ['2A', '23290841-6', 'FLORENCIA TRINIDAD', 'ROJAS GONZÁLEZ'], ['2A', '23264828-7', 'EDUARDO JAVIER', 'ROJAS LEIVA'], ['2A', '22763630-0', 'SCARLET NICOLE', 'VÁSQUEZ AGUILERA'], ['2A', '23616701-1', 'BRAYAN DAMIÁN', 'YÁÑEZ GONZÁLEZ'], ['2A', '23555453-4', 'MARTINA SAYEN', 'VARGAS MORAGA'], ['2A', '23301500-8', 'PEDRO JOSÉ', 'SALAZAR SALAS'], ['2A', '23296637-8', 'FLORENCIA ANTONIA', 'VERA BRAVO'], ['2A', '23479449-3', 'CONSTANZA TRINIDAD', 'PÉREZ QUEVEDO'], ['2A', '23112966-9', 'BENJAMÍN ALONSO', 'RIQUELME SANTOS'], ['3A', '23006149-1', 'TRINIDAD BELÉN', 'AHUMADA ROJAS'], ['3A', '23090163-5', 'FERNANDA ELENA', 'ESPINOSA TORRES'], ['3A', '23236242-1', 'BRAYAN JESÚS', 'ESPINOZA PEÑALILLO'], ['3A', '23121508-5', 'EMILIA CATALINA', 'GONZÁLEZ SALAZAR'], ['3A', '23132468-2', 'LEÓN IGNACIO', 'MEDEL OJEDA'], ['3A', '22617512-1', 'ALFONSO TOMÁS', 'MORALES REIMÁN'], ['3A', '23054557-K', 'MAXIMILIANO EDUARDO', 'PEREIRA HORMAZÁBAL'], ['3A', '23029359-7', 'JORDÁN AMARO', 'PINTO TOBAR'], ['3A', '23086976-6', 'KEVIN ANDRÉS', 'RECABAL YÁÑEZ'], ['3A', '23284002-1', 'MATÍAS EDUARDO ANTONIO', 'RIQUELME CASTILLO'], ['3A', '23141589-0', 'CONSTANZA VICTORIA', 'RIVERA ABARZA'], ['3A', '23294557-5', 'TEIVA SCARLETT', 'SANTIS CASSEUS'], ['3A', '22912548-6', 'KATHERINNE ALEXIA BELÉN', 'SOBARZO YÉVENES'], ['3A', '23209204-1', 'ANTONELLA INES', 'TOLEDO ALBORNOZ'], ['3A', '23115030-7', 'ANTONIA EDITH', 'VENEGAS ARRIAGADA'], ['3A', '23146366-6', 'JOAN MANUEL', 'VIELMA ZABALAGA'], ['3A', '23255825-3', 'ANGEL BLAS', 'MEZA COLIMÁN'], ['3A', '23164383-4', 'FLORENCIA ALEJANDRA', 'SAAVEDRA BRAVO'], ['3C', '22927087-7', 'ALEX FABIÁN', 'ARAYA DOMÍNGUEZ'], ['3C', '23099931-7', 'ALEX JOHAN', 'BRAVO MENARES'], ['3C', '23200990-K', 'BENJAMÍN IGNACIO', 'CARRASCO LEIVA'], ['3C', '23086622-8', 'CONSTANZA PRISILA (DANIEL)', 'CARVAJAL URRUTIA'], ['3C', '23194660-8', 'DIEGO BENJAMÍN ALEXANDER', 'ENCINA PIZARRO'], ['3C', '23229539-2', 'ALEJANDRO ANTONIO', 'FAÚNDEZ NORAMBUENA'], ['3C', '22827535-2', 'EMILIO SCOTT', 'JARAMILLO VILLAR'], ['3C', '23321258-K', 'MARTÍN ALONSO', 'LÓPEZ VILLAR'], ['3C', '23285276-3', 'ALEXANDRA JAVIERA', 'MIRANDA MUÑOZ'], ['3C', '22459961-7', 'HÉCTOR ANTONIO', 'MUÑOZ TRONCOSO'], ['3C', '23097156-0', 'ALONSO IGNACIO', 'OLIVARES VALENZUELA'], ['3C', '22804086-K', 'ANTONELLA DANAE IGNACIA', 'OLIVARES VALENZUELA'], ['3C', '22876195-8', 'MATÍAS LEANDRO', 'ORELLANA GARRIDO'], ['3C', '23113000-4', 'MILLARAY ANGÉLICA', 'PUNOY MEDEL'], ['3C', '23118361-2', 'CRISTÓBAL PATRICIO', 'QUIÑENAO MUÑOZ'], ['3C', '23244598-K', 'DALIA CONSTANZA', 'RIQUELME COLOMA'], ['3C', '23304433-4', 'VICENTE MOISÉS', 'SALGADO ROJAS'], ['3C', '22922664-9', 'VICENTE ESTEBAN', 'SANDOVAL CERPA'], ['3C', '23230279-8', 'CHRISTOPHER', '', 'SOTO NARANJO'], ['3C', '22907717-1', 'MARTÍN', '', 'VEKARIC VERDEJO'],
-            ['4A', '22717035-2', 'MARTINA ALEJANDRA', 'ALCÁNTAR GARCÍA'], ['4A', '22202028-K', 'ARIEL LEON', 'BAHAMONDE MUÑOZ'], ['4A', '22932851-4', 'CRISTOPHER JESÚS', 'CAMPOS MUÑOZ'], ['4A', '22587064-0', 'VICENTE GASPAR', 'CANCINO ORÓSTICA'], ['4A', '22935345-4', 'CAMILA ANDREA', 'CARRASCO GONZÁLEZ'], ['4A', '22852052-7', 'ANTONIO ANDRÉS', 'COFRÉ CASTILLO'], ['4A', '22542992-8', 'BELÉN ALEJANDRA', 'CONTRERAS VENEGAS'], ['4A', '22897408-0', 'FELIPE ESTEBAN', 'GALDAMES VERGARA'], ['4A', '22152106-4', 'SANTIAGO HUMBERTO', 'GARCÍA GONZÁLEZ'], ['4A', '22820588-5', 'FRANCISCA IGNACIA', 'GONZÁLEZ AMIGO'], ['4A', '22565627-4', 'JOAQUÍN ALONSO', 'GONZÁLEZ SALAZAR'], ['4A', '22808692-4', 'ANGEL MARTÍN', 'GUTIÉRREZ GUTIÉRREZ'], ['4A', '22970003-0', 'AARON ALEJANDRO', 'MARTÍNEZ LIZANA'], ['4A', '22482618-4', 'BENJAMÍN INTI', 'MEZA CARRASCO'], ['4A', '22858572-6', 'CATALINA ANDREA', 'MIÑO GONZALEZ'], ['4A', '22932822-0', 'RENATO IGNACIO', 'MORAGA PACHECO'], ['4A', '22839912-4', 'MANUEL IGNACIO', 'PÉREZ CORÓN'], ['4A', '100710921-7', 'JAKSON FERGIE', 'SAMANIEGO CORTEZ'], ['4A', '22889391-9', 'SOFÍA ANTONIA', 'SEPÚLVEDA SALAZAR'], ['4A', '22709426-5', 'GABRIEL ANTONIO', 'TAPIA ACUÑA'], ['4A', '23022549-4', 'CRISTÓBAL ANTONIO', 'VEGA VIVANCO'], ['4A', '22903476-6', 'DANIELA ELIZABETH', 'VERA NAVARRETE'], ['4A', '22792420-9', 'KARINA ANGELINA', 'VILLALOBOS ARAVENA'], ['4A', '22733377-4', 'SAMIR LUCIAN JESUS', 'VILLALOBOS VILLALOBOS'], ['4A', '22644932-9', 'VICENTE ALEJANDRO', 'HERNÁNDEZ SEPÚLVEDA'], ['4A', '100793606-7', 'FLORVELIS DE LOS ANGELES', 'TORREALBA MOYA'], ['4A', '23038091-0', 'CONSUELO ANTONIA', 'CARO URRUTIA'], ['4A', '22448022-9', 'ANTONIA PAZ', 'LOBOS CÁCERES'], ['4C', '22558171-1', 'MARTÍN ANTONIO', 'ARELLANO ACUÑA'], ['4C', '22897577-K', 'DAYANA IGNACIA', 'AROS ÁVILA'], ['4C', '22339310-1', 'MARÍA GRACIA', 'CABRERA COLOMBINO'], ['4C', '22865819-7', 'YARIXA ALEJANDRA', 'FUENTES CARRASCO'], ['4C', '22971225-K', 'DANIELA ALEJANDRA', 'GÓMEZ CANCINO'], ['4C', '22698950-1', 'MILLARAY CAROLINA', 'GUTIÉRREZ CARRIÓN'], ['4C', '22665539-5', 'GLORIA JAVIERA', 'HONORATO TAPIA'], ['4C', '22907525-K', 'BENJAMÍN ESTEBAN', 'LARA RIVERA'], ['4C', '22801082-0', 'JOSÉ TOMÁS', 'PALACIOS SOTO'], ['4C', '22477831-7', 'JOSÉ CRISTÓBAL', 'PEZO SANTANDER'], ['4C', '22796354-9', 'JOSÉ PABLO WILLIAMS', 'ROCHA ROJAS'], ['4C', '22876139-7', 'FABIANA ISIDORA', 'ROJAS YÉVENES'], ['4C', '22916573-9', 'ANDY ANTONIO', 'SÁNCHEZ PAREJA'], ['4C', '22845486-9', 'SIMÓN ESTEBAN', 'SANTANDER LÓPEZ'], ['4C', '23004590-9', 'SIOMARA IGNACIA', 'TRONCOSO LIZAMA'], ['4C', '23009921-9', 'LUCIANA BERNABELA', 'WARNKEN ROJAS'], ['4C', '22783846-9', 'FRANCO SEBASTIÁN', 'DE LA HOZ VALENZUELA'], ['4C', '23048274-8', 'ANAÍS VALENTINA', 'COLLAO MEDINA']
+        // NÓMINA OFICIAL 2026 (ACTUALIZADA)
+        const STUDENTS_DATA = [
+            ['Primero Medio A', '23756366-2', '', 'ÁLVAREZ FAÚNDEZ MATEO VICENTE'], ['Primero Medio A', '23632281-5', '', 'CASTILLO ARAVENA MAITE PASCAL'], ['Primero Medio A', '23630802-2', '', 'COLLADO PUENTES SANTINO ALEXANDER'], ['Primero Medio A', '23466096-9', '', 'CONCHA TORREALBA JOAQUÍN IGNACIO'], ['Primero Medio A', '23797819-6', '', 'DÍAZ MALUENDA ESTEFANÍA ANTONIA'], ['Primero Medio A', '23927686-5', '', 'DONAIRE ROJAS MAITE EMILIA ESTER'], ['Primero Medio A', '23552792-8', '', 'ESPINOZA CACHAÑA LISBET ALEXANDRA'], ['Primero Medio A', '23560082-K', '', 'FERRADA ALBORNOZ AGUSTÍN ALEXIS'], ['Primero Medio A', '23329694-5', '', 'FUENTEMAVIDA BARROS OSCAR ANTONIO'], ['Primero Medio A', '23620840-0', '', 'JAQUE PACHECO DAMIÁN IGNACIO'], ['Primero Medio A', '23308540-5', '', 'JARAMILLO VILLAR MATT HOST'], ['Primero Medio A', '23355954-7', '', 'LÓPEZ ACUÑA MARCO EMILIO'], ['Primero Medio A', '23903961-8', '', 'LÓPEZ VILLAR FRANCO IGNACIO'], ['Primero Medio A', '23032545-6', '', 'MESA DÍAZ GONZALO IGNACIO'], ['Primero Medio A', '23520544-0', '', 'MEZA CARRASCO CRISTIAN ALFONSO'], ['Primero Medio A', '23668420-2', '', 'MORALES GARRIDO NICOLÁS ANTONIO'], ['Primero Medio A', '23830831-3', '', 'ORTEGA DA SILVA EMILIA CATALINA SOPHIA'], ['Primero Medio A', '23653817-6', '', 'PEREIRA TAPIA KEVIN RUBÉN'], ['Primero Medio A', '23679011-8', '', 'RAMÍREZ SEPÚLVEDA LUIS JUSTIN JESÚS'], ['Primero Medio A', '23488123-K', '', 'RAMÍREZ VALDÉS MARTINA POLETTE'], ['Primero Medio A', '23493746-4', '', 'RECABAL YÁÑEZ TOMÁS IGNACIO'], ['Primero Medio A', '22988470-0', '', 'RODRÍGUEZ SEPÚLVEDA SIMONEY ISAMAR'], ['Primero Medio A', '23710287-8', '', 'ROJAS ÓRDENES TRACY MAIDEN'], ['Primero Medio A', '23577058-K', '', 'SÁNCHEZ MUNIZAGA ALONDRA ANAÍS'], ['Primero Medio A', '100685011-8', '', 'SOLIZ OLGUIN BRAYAN'], ['Primero Medio A', '23937949-4', '', 'VALENZUELA MUÑOZ MAGDALENA BELÉN'],
+            ['Segundo Medio A', '23376817-0', '', 'ALBURQUENQUE DEL GRECCO EMILYA ANTONIA'], ['Segundo Medio A', '22922460-3', '', 'ANABALÓN BELTRÁN BENJAMÍN NICOLÁS'], ['Segundo Medio A', '23367234-3', '', 'ARAVENA ZÚÑIGA NOEMÍ JESÚS DE LAS ESTRELLAS'], ['Segundo Medio A', '22927087-7', '', 'ARAYA DOMÍNGUEZ ALEX FABIÁN'], ['Segundo Medio A', '22826488-1', '', 'ASTUDILLO CAMPOS CRISTÓBAL ANTONIO'], ['Segundo Medio A', '23251746-8', '', 'ASTUDILLO VÁSQUEZ BRUNO FERNANDO LEÓN'], ['Segundo Medio A', '23461777-K', '', 'BAEZ DONOSO LUKAS ALFONSO'], ['Segundo Medio A', '23282399-2', '', 'CARO BUSTOS KRISCHNA ESTEFANIA'], ['Segundo Medio A', '23355953-9', '', 'CONTRERAS SALGADO HADEEY ALEJANDRA'], ['Segundo Medio A', '23545428-9', '', 'CUMINAO VIDAL CATALINA ANDREA'], ['Segundo Medio A', '23224652-9', '', 'DÍAZ MALUENDA MIGUEL ALBERTO'], ['Segundo Medio A', '23644472-4', '', 'IBÁÑEZ GONZÁLEZ FERNANDA MAGDALENA'], ['Segundo Medio A', '23337375-3', '', 'KILTAN GONZÁLEZ DIDIER EZEQUIEL'], ['Segundo Medio A', '23389072-3', '', 'LAGOS LASTRA ALEXANDRA DANAE'], ['Segundo Medio A', '23498596-5', '', 'LÓPEZ LÓPEZ LUCIANO ANTONIO'], ['Segundo Medio A', '23153879-8', '', 'LÓPEZ NOVOA EYDAN DAMIÁN'], ['Segundo Medio A', '23396870-6', '', 'MALDONADO FLORES ANTONELLA BELÉN'], ['Segundo Medio A', '23548214-2', '', 'MONTECINO DÍAZ VALESKA BELÉN'], ['Segundo Medio A', '23391772-9', '', 'MOYA REYES MATEO ANTONIO BENJAMÍN'], ['Segundo Medio A', '23366642-4', '', 'MUÑOZ CONTRERAS LUIS GABRIEL'], ['Segundo Medio A', '23622121-0', '', 'MUÑOZ LUNA ROGER JOEL'], ['Segundo Medio A', '23329866-2', '', 'NAVARRO VILLANUEVA KARLA PAZ'], ['Segundo Medio A', '23388136-8', '', 'ORELLANA ARRIAGADA SEBASTIÁN ANDRÉS'], ['Segundo Medio A', '23432193-5', '', 'OSES CAMPOS VALENTINA ABIGAIL'], ['Segundo Medio A', '23190411-5', '', 'PALMA ORELLANA ANTONELLA FRANCISCA'], ['Segundo Medio A', '23605196-K', '', 'PEREIRA ORELLANA MONSERRAT ALAMIRA'], ['Segundo Medio A', '23415461-3', '', 'PÉREZ ORMAZÁBAL ZADKA ALEJANDRA'], ['Segundo Medio A', '23479449-3', '', 'PÉREZ QUEVEDO CONSTANZA TRINIDAD'], ['Segundo Medio A', '23640108-1', '', 'QUEZADA NARANJO FELIPE ALONSO'], ['Segundo Medio A', '23534317-7', '', 'RAMÍREZ VILLALOBOS DUVAN EMILIO'], ['Segundo Medio A', '23112966-9', '', 'RIQUELME SANTOS BENJAMÍN ALONSO'], ['Segundo Medio A', '23290841-6', '', 'ROJAS GONZÁLEZ FLORENCIA TRINIDAD'], ['Segundo Medio A', '23264828-7', '', 'ROJAS LEIVA EDUARDO JAVIER'], ['Segundo Medio A', '23301500-8', '', 'SALAZAR SALAS PEDRO JOSÉ'], ['Segundo Medio A', '23679554-3', '', 'SANTANDER LÓPEZ MARÍA JOSÉ'], ['Segundo Medio A', '23631475-8', '', 'TAPIA CASTILLA JEANFRANCO PATRICK'], ['Segundo Medio A', '23007625-1', '', 'URBINA CÁCERES FRANCHESCA POULETTE'], ['Segundo Medio A', '23555453-4', '', 'VARGAS MORAGA MARTINA SAYEN'], ['Segundo Medio A', '22763630-0', '', 'VÁSQUEZ AGUILERA SCARLET NICOLE'], ['Segundo Medio A', '23584521-0', '', 'VÁSQUEZ ZALDUENDO AMANDA ISABEL'], ['Segundo Medio A', '23296637-8', '', 'VERA BRAVO FLORENCIA ANTONIA'], ['Segundo Medio A', '23616701-1', '', 'YÁÑEZ GONZÁLEZ BRAYAN DAMIÁN'], ['Segundo Medio A', '23404221-1', '', 'ZABALAGA COFRÉ DAMIÁN ANDRÉS'],
+            ['Tercero Medio A', '23006149-1', '', 'AHUMADA ROJAS TRINIDAD BELÉN'], ['Tercero Medio A', '22774362-K', '', 'CORNEJO CASTILLO OSCAR GABRIEL'], ['Tercero Medio A', '23236242-1', '', 'ESPINOZA PEÑALILLO BRAYAN JESÚS'], ['Tercero Medio A', '23229539-2', '', 'FAÚNDEZ NORAMBUENA ALEJANDRO ANTONIO'], ['Tercero Medio A', '22827535-2', '', 'JARAMILLO VILLAR EMILIO SCOTT'], ['Tercero Medio A', '23321258-K', '', 'LÓPEZ VILLAR MARTÍN ALONSO'], ['Tercero Medio A', '23255825-3', '', 'MEZA COLIMÁN ANGEL BLAS'], ['Tercero Medio A', '23285276-3', '', 'MIRANDA MUÑOZ ALEXANDRA JAVIERA'], ['Tercero Medio A', '22932822-0', '', 'MORAGA PACHECO RENATO IGNACIO'], ['Tercero Medio A', '22617512-1', '', 'MORALES REIMÁN ALFONSO TOMÁS'], ['Tercero Medio A', '22876195-8', '', 'ORELLANA GARRIDO MATÍAS LEANDRO'], ['Tercero Medio A', '23054557-K', '', 'PEREIRA HORMAZÁBAL MAXIMILIANO EDUARDO'], ['Tercero Medio A', '23029359-7', '', 'PINTO TOBAR JORDÁN AMARO'], ['Tercero Medio A', '23086976-6', '', 'RECABAL YÁÑEZ KEVIN ANDRÉS'], ['Tercero Medio A', '22922664-9', '', 'SANDOVAL CERPA VICENTE ESTEBAN'], ['Tercero Medio A', '23230279-8', '', 'SOTO NARANJO CHRISTOPHER'], ['Tercero Medio A', '22907717-1', '', 'VEKARIC VERDEJO MARTÍN'], ['Tercero Medio A', '23146366-6', '', 'VIELMA ZABALAGA JOAN MANUEL'],
+            ['Tercero Medio C', '23099931-7', '', 'BRAVO MENARES ALEX JOHAN'], ['Tercero Medio C', '23200990-K', '', 'CARRASCO LEIVA BENJAMÍN IGNACIO'], ['Tercero Medio C', '23194660-8', '', 'ENCINA PIZARRO DIEGO BENJAMÍN ALEXANDER'], ['Tercero Medio C', '23090163-5', '', 'ESPINOSA TORRES FERNANDA ELENA'], ['Tercero Medio C', '23121508-5', '', 'GONZÁLEZ SALAZAR EMILIA CATALINA'], ['Tercero Medio C', '23132468-2', '', 'MEDEL OJEDA LEÓN IGNACIO'], ['Tercero Medio C', '23097156-0', '', 'OLIVARES VALENZUELA ALONSO IGNACIO'], ['Tercero Medio C', '22804086-K', '', 'OLIVARES VALENZUELA ANTONELLA DANAE IGNACIA'], ['Tercero Medio C', '23113000-4', '', 'PUNOY MEDEL MILLARAY ANGÉLICA'], ['Tercero Medio C', '23118361-2', '', 'QUIÑENAO MUÑOZ CRISTÓBAL PATRICIO'], ['Tercero Medio C', '23284002-1', '', 'RIQUELME CASTILLO MATÍAS EDUARDO ANTONIO'], ['Tercero Medio C', '23244598-K', '', 'RIQUELME COLOMA DALIA CONSTANZA'], ['Tercero Medio C', '23141589-0', '', 'RIVERA ABARZA CONSTANZA VICTORIA'], ['Tercero Medio C', '23164383-4', '', 'SAAVEDRA BRAVO FLORENCIA ALEJANDRA'], ['Tercero Medio C', '23304433-4', '', 'SALGADO ROJAS VICENTE MOISÉS'], ['Tercero Medio C', '23294557-5', '', 'SANTIS CASSEUS TEIVA SCARLETT'], ['Tercero Medio C', '22912548-6', '', 'SOBARZO YÉVENES KATHERINNE ALEXIA BELÉN'], ['Tercero Medio C', '23209204-1', '', 'TOLEDO ALBORNOZ ANTONELLA INES'], ['Tercero Medio C', '23115030-7', '', 'VENEGAS ARRIAGADA ANTONIA EDITH'],
+            ['Cuarto Medio A', '22717035-2', '', 'ALCÁNTAR GARCÍA MARTINA ALEJANDRA'], ['Cuarto Medio A', '22202028-K', '', 'BAHAMONDE MUÑOZ ARIEL LEON'], ['Cuarto Medio A', '22932851-4', '', 'CAMPOS MUÑOZ CRISTOPHER JESÚS'], ['Cuarto Medio A', '22587064-0', '', 'CANCINO ORÓSTICA VICENTE GASPAR'], ['Cuarto Medio A', '23038091-0', '', 'CARO URRUTIA CONSUELO ANTONIA'], ['Cuarto Medio A', '22935345-4', '', 'CARRASCO GONZÁLEZ CAMILA ANDREA'], ['Cuarto Medio A', '22852052-7', '', 'COFRÉ CASTILLO ANTONIO ANDRÉS'], ['Cuarto Medio A', '22897408-0', '', 'GALDAMES VERGARA FELIPE ESTEBAN'], ['Cuarto Medio A', '22152106-4', '', 'GARCÍA GONZÁLEZ SANTIAGO HUMBERTO'], ['Cuarto Medio A', '22820588-5', '', 'GONZÁLEZ AMIGO FRANCISCA IGNACIA'], ['Cuarto Medio A', '22565627-4', '', 'GONZÁLEZ SALAZAR JOAQUÍN ALONSO'], ['Cuarto Medio A', '22808692-4', '', 'GUTIÉRREZ GUTIÉRREZ ANGEL MARTÍN'], ['Cuarto Medio A', '22644932-9', '', 'HERNÁNDEZ SEPÚLVEDA VICENTE ALEJANDRO'], ['Cuarto Medio A', '22448022-9', '', 'LOBOS CÁCERES ANTONIA PAZ'], ['Cuarto Medio A', '22970003-0', '', 'MARTÍNEZ LIZANA AARON ALEJANDRO'], ['Cuarto Medio A', '22482618-4', '', 'MEZA CARRASCO BENJAMÍN INTI'], ['Cuarto Medio A', '22858572-6', '', 'MIÑO GONZALEZ CATALINA ANDREA'], ['Cuarto Medio A', '22932822-0', '', 'MORAGA PACHECO RENATO IGNACIO'], ['Cuarto Medio A', '22839912-4', '', 'PÉREZ CORÓN MANUEL IGNACIO'], ['Cuarto Medio A', '100710921-7', '', 'SAMANIEGO CORTEZ JAKSON FERGIE'], ['Cuarto Medio A', '22889391-9', '', 'SEPÚLVEDA SALAZAR SOFÍA ANTONIA'], ['Cuarto Medio A', '22709426-5', '', 'TAPIA ACUÑA GABRIEL ANTONIO'], ['Cuarto Medio A', '100793606-7', '', 'TORREALBA MOYA FLORVELIS DE LOS ANGELES'], ['Cuarto Medio A', '23022549-4', '', 'VEGA VIVANCO CRISTÓBAL ANTONIO'], ['Cuarto Medio A', '22903476-6', '', 'VERA NAVARRETE DANIELA ELIZABETH'], ['Cuarto Medio A', '22792420-9', '', 'VILLALOBOS ARAVENA KARINA ANGELINA'], ['Cuarto Medio A', '22733377-4', '', 'VILLALOBOS VILLALOBOS SAMIR LUCIAN JESÚS'],
+            ['Cuarto Medio C', '22558171-1', '', 'ARELLANO ACUÑA MARTÍN ANTONIO'], ['Cuarto Medio C', '22897577-K', '', 'AROS ÁVILA DAYANA IGNACIA'], ['Cuarto Medio C', '22339310-1', '', 'CABRERA COLOMBINO MARÍA GRACIA'], ['Cuarto Medio C', '23048274-8', '', 'COLLAO MEDINA ANAÍS VALENTINA'], ['Cuarto Medio C', '22783846-9', '', 'DE LA HOZ VALENZUELA FRANCO SEBASTIÁN'], ['Cuarto Medio C', '22865819-7', '', 'FUENTES CARRASCO YARIXA ALEJANDRA'], ['Cuarto Medio C', '22971225-K', '', 'GÓMEZ CANCINO DANIELA ALEJANDRA'], ['Cuarto Medio C', '22698950-1', '', 'GUTIÉRREZ CARRIÓN MILLARAY CAROLINA'], ['Cuarto Medio C', '22665539-5', '', 'HONORATO TAPIA GLORIA JAVIERA'], ['Cuarto Medio C', '22907525-K', '', 'LARA RIVERA BENJAMÍN ESTEBAN'], ['Cuarto Medio C', '22801082-0', '', 'PALACIOS SOTO JOSÉ TOMÁS'], ['Cuarto Medio C', '22477831-7', '', 'PEZO SANTANDER JOSÉ CRISTÓBAL'], ['Cuarto Medio C', '22796354-9', '', 'ROCHA ROJAS JOSÉ PABLO WILLIAMS'], ['Cuarto Medio C', '22876139-7', '', 'ROJAS YÉVENES FABIANA ISIDORA'], ['Cuarto Medio C', '22916573-9', '', 'SÁNCHEZ PAREJA ANDY ANTONIO'], ['Cuarto Medio C', '22845486-9', '', 'SANTANDER LÓPEZ SIMÓN ESTEBAN'], ['Cuarto Medio C', '23004590-9', '', 'TRONCOSO LIZAMA SIOMARA IGNACIA'], ['Cuarto Medio C', '23009921-9', '', 'WARNKEN ROJAS LUCIANA BERNABELA']
         ];
 
         let db, chartInstance = null;
@@ -402,7 +404,6 @@
                 populateDropdowns();
                 loadHistory(); 
                 
-                // Fecha de hoy por defecto en tutoría
                 document.getElementById('tut-fecha').valueAsDate = new Date();
                 
             }).catch((error) => {
@@ -414,8 +415,21 @@
 
         function populateDropdowns() {
             const courseSelect = document.getElementById('course-select');
-            const courses = [...new Set(STUDENTS_2025.map(s => s[0]))].sort();
-            courses.forEach(c => {
+            courseSelect.innerHTML = '<option value="">-- Seleccione un Curso --</option>'; // Limpiar antes de llenar
+            
+            // Obtener cursos únicos
+            const uniqueCourses = [...new Set(STUDENTS_DATA.map(s => s[0]))];
+            
+            // ORDEN PERSONALIZADO: Primero, Segundo, Tercero, Cuarto
+            const order = { 'Primero': 1, 'Segundo': 2, 'Tercero': 3, 'Cuarto': 4 };
+            uniqueCourses.sort((a, b) => {
+                const wordA = a.split(' ')[0]; // "Primero", "Segundo", etc.
+                const wordB = b.split(' ')[0];
+                return (order[wordA] || 99) - (order[wordB] || 99) || a.localeCompare(b);
+            });
+
+            // Llenar el select
+            uniqueCourses.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c; opt.innerText = c;
                 courseSelect.appendChild(opt);
@@ -428,7 +442,7 @@
             select.innerHTML = '<option value="">-- Seleccione Alumno --</option>';
             select.disabled = true;
             if(course) {
-                STUDENTS_2025.filter(s => s[0] === course).forEach(s => {
+                STUDENTS_DATA.filter(s => s[0] === course).forEach(s => {
                     const fullName = `${s[3]} ${s[2]}`;
                     select.innerHTML += `<option value="${s[1]}">${fullName}</option>`;
                 });
@@ -438,14 +452,13 @@
 
         window.loadStudentFromList = () => {
             const rut = document.getElementById('student-select').value;
-            const student = STUDENTS_2025.find(s => s[1] === rut);
+            const student = STUDENTS_DATA.find(s => s[1] === rut);
             if(student) {
                 const fullName = `${student[3]} ${student[2]}`;
                 document.getElementById('inp-nombre').value = fullName;
                 document.getElementById('inp-rut').value = student[1];
                 document.getElementById('inp-curso').value = student[0];
                 
-                // Actualizar encabezado de Tutoría también
                 updateTutoriaHeader();
             }
         };
@@ -563,18 +576,16 @@
                     document.getElementById('inp-asignaturas').value = d.academic?.failedSubjectsText || d.decision?.failedSubjects || '';
                     document.getElementById('inp-asistencia').value = d.decision?.attendance || '';
                     
-                    // Tutoría (Solo carga campo simple legado, pero actualiza header)
                     document.getElementById('inp-tutor').value = d.tutoria?.tutor1 || '';
                     
                     updateChart();
-                    updateTutoriaHeader(); // Actualizar hoja visual
+                    updateTutoriaHeader();
                     switchTab('ficha');
                     Swal.fire('Cargado', 'Informe recuperado.', 'success');
                 }
             } catch (e) { console.error(e); }
         };
 
-        // --- LÓGICA DE PESTAÑAS ---
         window.switchTab = (tab) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -585,9 +596,6 @@
             if(tab === 'analisis') setTimeout(updateChart, 200);
         }
 
-        // --- NUEVA LÓGICA DE TUTORÍA ---
-        
-        // 1. Actualizar Encabezado de la Hoja
         window.updateTutoriaHeader = () => {
             document.getElementById('view-nombre').textContent = document.getElementById('inp-nombre').value;
             document.getElementById('view-curso').textContent = document.getElementById('inp-curso').value;
@@ -595,7 +603,6 @@
             document.getElementById('view-sign-tutor').textContent = document.getElementById('inp-tutor').value;
         };
 
-        // 2. Agregar Fila a la Hoja Visual
         window.addTutoriaRow = () => {
             const sem = document.getElementById('tut-semestre').value;
             const fechaInp = document.getElementById('tut-fecha').value;
@@ -604,7 +611,6 @@
 
             if(!fechaInp || !obs) return Swal.fire('Falta información', 'Ingresa al menos fecha y observación.', 'warning');
 
-            // Formatear fecha (dd/mm)
             const parts = fechaInp.split('-');
             const fechaStr = `${parts[2]}/${parts[1]}`;
 
@@ -617,29 +623,22 @@
                 <td class="border px-2 py-1 align-top italic text-gray-700">${acu || '-'}</td>
             `;
             
-            // Doble clic para borrar
             tr.ondblclick = function() { if(confirm('¿Borrar esta línea?')) this.remove(); };
             tr.title = "Doble clic para borrar esta fila";
             
             tbody.appendChild(tr);
 
-            // Limpiar inputs
             document.getElementById('tut-obs').value = '';
             document.getElementById('tut-acuerdos').value = '';
         };
 
-        // --- IMPRESIÓN MEJORADA (DISTINGUE TIPO) ---
         window.printReport = (type) => {
             const getVal = (id) => document.getElementById(id).value || "---";
             let content = '';
 
             if (type === 'tutoria') {
-                // Imprimir SOLO la hoja visual de tutoría tal cual está
                 content = document.getElementById('hoja-tutoria-visual').outerHTML;
             } else {
-                // Imprimir Informe de Repitencia (Tu formato original)
-                
-                // Cálculos visuales
                 const p1 = parseFloat(getVal('inp-sem1')) || 0;
                 const p2 = parseFloat(getVal('inp-sem2')) || 0;
                 const promAlumno = ((p1 + p2) / 2).toFixed(1);
@@ -665,7 +664,7 @@
                     <div class="doc-container">
                         <div class="doc-header">
                             <div style="display:flex; gap:15px; align-items:center;">
-                                <img src="logo.jpg" style="height:70px;">
+                                <img src="logo.jpg" style="height:70px;" onerror="this.style.display='none'">
                                 <div>
                                     <h2 style="margin:0; font-weight:bold; font-size:12pt; text-transform:uppercase;">${SCHOOL_NAME}</h2>
                                     <p style="margin:0; font-size:10pt;">${LOCATION} • UTP</p>
