@@ -3,526 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Citaciones a Apoderados</title>
+    <title>Gestión de Citaciones - Escuela Agrícola</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .card { background-color: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
         
-        .main-wrapper { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-
-        .card {
-            background-color: white; padding: 1.5rem; border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;
-        }
-
-        /* --- ESTILOS DE IMPRESIÓN (COLILLA DE CITACIÓN) --- */
         @media print {
-            @page { size: Letter portrait; margin: 0.5cm; }
-            
+            @page { size: Letter portrait; margin: 0; }
             body > *:not(#printable-area) { display: none !important; }
-
-            #printable-area {
-                display: block !important; 
-                visibility: visible !important;
-                position: absolute; left: 0; top: 0; width: 100%;
-            }
+            #printable-area { display: block !important; width: 100%; }
             
-            #printable-area * { visibility: visible !important; }
-            
-            /* Diseño de la Colilla (3 por hoja aprox) */
-            .citation-slip {
-                border: 2px solid #000;
-                padding: 15px;
-                margin-bottom: 1.5cm; /* Espacio para corte */
-                background: white;
-                break-inside: avoid;
+            /* Contenedor para que salgan dos por hoja */
+            .citation-wrapper {
+                width: 216mm; /* Ancho carta */
+                height: 139mm; /* Mitad de alto carta aprox */
+                padding: 15mm;
+                box-sizing: border-box;
+                border-bottom: 1px dashed #ccc; /* Guía de corte */
+                position: relative;
                 page-break-inside: avoid;
-                display: flex;
-                flex-direction: row;
-                height: 8cm; /* Altura fija para uniformidad */
             }
 
-            .slip-left { width: 70%; padding-right: 15px; border-right: 1px dashed #ccc; }
-            .slip-right { width: 30%; padding-left: 15px; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+            .citation-card {
+                width: 100%;
+                height: 100%;
+                border: 2px solid #4c1d95;
+                border-radius: 12px;
+                display: flex;
+                padding: 20px;
+                background: white;
+                color: black;
+            }
 
-            .no-print, #message-box { display: none !important; }
+            .card-body { width: 65%; border-right: 1px dashed #4c1d95; padding-right: 20px; }
+            .card-side { width: 35%; padding-left: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+            
+            .header-title { color: #4c1d95; font-size: 20px; font-weight: 800; text-transform: uppercase; margin: 0; }
+            .school-name { font-size: 12px; color: #6b21a8; margin-bottom: 15px; font-weight: 600; }
+            .data-label { font-weight: 700; color: #374151; font-size: 11px; text-transform: uppercase; margin-top: 8px; }
+            .data-value { font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 2px; }
+            .signature-line { border-top: 1.5px solid #000; margin-top: 60px; padding-top: 8px; font-size: 10px; font-weight: bold; }
+            .print-footer-credit { position: absolute; bottom: 18mm; right: 18mm; font-size: 8px; color: #9ca3af; }
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen p-4 flex flex-col">
+    <div id="message-box" class="fixed top-5 right-5 bg-purple-600 text-white px-6 py-3 rounded shadow-lg hidden z-50"></div>
 
-    <div id="message-box" class="fixed top-5 right-5 bg-purple-600 text-white px-6 py-3 rounded shadow-lg hidden transition-opacity z-50"></div>
-
-    <div class="main-wrapper">
-        
-        <div class="flex items-center justify-between mb-8 border-b pb-4 bg-white p-4 rounded-xl shadow-sm">
+    <div class="max-w-7xl mx-auto space-y-6 flex-grow">
+        <div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border-b-4 border-purple-600">
             <div class="flex items-center gap-4">
-                <img src="logo.jpg" class="h-16 w-auto object-contain bg-gray-50 rounded-full p-1 border" onerror="this.style.display='none'">
+                <img src="logo.jpg" alt="Logo" class="h-16 w-auto object-contain" onerror="this.alt='Escuela Agrícola'">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">Citación de Apoderados</h1>
-                    <p class="text-xs text-gray-500 font-medium">Escuela Agrícola Sagrados Corazones</p>
+                    <p class="text-xs text-purple-600 font-bold uppercase">Escuela Agrícola Sagrados Corazones</p>
                 </div>
             </div>
-            <div class="text-right">
-                <div class="flex gap-2">
-                    <button class="bg-red-100 text-red-700 px-4 py-2 rounded font-bold hover:bg-red-200 text-sm transition" id="clear-data-btn">Limpiar Local</button>
-                    <button class="bg-purple-600 text-white px-4 py-2 rounded font-bold hover:bg-purple-700 text-sm transition" id="print-report-btn">Reporte Diario</button>
-                </div>
-                <p class="text-[10px] text-gray-400 mt-2 font-mono text-right">Desarrollado por ProfeAle</p>
-            </div>
+            <div id="status-indicator" class="text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-200">⌛ Conectando con Google...</div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <div class="card border-t-4 border-purple-500">
-                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Nueva Citación</h2>
-                
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Curso</label>
-                        <select id="course-select" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none bg-gray-50">
-                            <option value="">Selecciona un curso</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Estudiante</label>
-                        <select id="student-select" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none bg-gray-50" disabled>
-                            <option value="">Primero selecciona un curso</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fecha Citación</label>
-                            <input type="date" id="citation-date" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Hora</label>
-                            <input type="time" id="citation-time" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Motivo</label>
-                        <select id="reason-select" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none bg-white">
-                            <option value="Rendimiento Académico">Rendimiento Académico</option>
-                            <option value="Conducta / Disciplina">Conducta / Disciplina</option>
-                            <option value="Convivencia Escolar">Convivencia Escolar</option>
-                            <option value="Asistencia / Atrasos">Asistencia / Atrasos</option>
-                            <option value="Entrevista Regular">Entrevista Regular</option>
-                            <option value="Salud">Salud / Enfermería</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Modalidad</label>
-                            <select id="mode-select" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none">
-                                <option value="Presencial">Presencial</option>
-                                <option value="Telefónica">Telefónica</option>
-                                <option value="Videollamada">Videollamada</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Solicita / Cita</label>
-                            <select id="teacher-input" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none bg-white">
-                                <option value="">-- Seleccionar --</option>
-                                <option value="Profesor Jefe">Profesor Jefe</option>
-                                <option value="Equipo PIE">Equipo PIE</option>
-                                <option value="Inspectoría General">Inspectoría General</option>
-                                <option value="UTP">UTP</option>
-                                <option value="Director">Director</option>
-                                <option value="Psicóloga">Psicóloga</option>
-                                <option value="Profesor Tutor">Profesor Tutor</option>
-                                <option value="Otro / Prof. Asignatura">Otro / Prof. Asignatura</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Observaciones (Opcional)</label>
-                        <textarea id="obs-input" rows="2" class="w-full p-2 border rounded focus:ring-2 focus:ring-purple-200 outline-none text-sm" placeholder="Traer libreta, informes, etc."></textarea>
-                    </div>
-
-                    <button id="add-to-print-list-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded shadow transition transform active:scale-95 mt-2">
-                        Generar Citación
-                    </button>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="card space-y-4">
+                <h2 class="font-bold text-gray-700 border-b pb-2">Nueva Citación</h2>
+                <select id="course-select" class="w-full p-2 border rounded bg-gray-50 text-sm"></select>
+                <select id="student-select" class="w-full p-2 border rounded bg-gray-50 text-sm" disabled><option>Seleccione Alumno...</option></select>
+                <input type="email" id="parent-email" class="w-full p-2 border rounded text-sm" placeholder="Email Apoderado">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="date" id="citation-date" class="w-full p-2 border rounded text-sm">
+                    <input type="time" id="citation-time" class="w-full p-2 border rounded text-sm">
                 </div>
-
-                <div id="print-list-container" class="mt-6 pt-4 border-t border-dashed hidden">
-                    <div class="flex justify-between items-center mb-2 bg-yellow-50 p-2 rounded">
-                        <h3 class="font-bold text-yellow-800 text-sm">🖨️ Citaciones por Imprimir</h3>
-                        <button id="clear-print-list-btn" class="text-xs text-red-500 font-bold hover:underline">Vaciar Cola</button>
-                    </div>
-                    <ul id="print-list" class="space-y-1 mb-4 text-sm max-h-40 overflow-y-auto"></ul>
-                    <button id="print-collective-btn" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 rounded shadow flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" /></svg>
-                        Imprimir Citaciones
-                    </button>
+                <select id="teacher-input" class="w-full p-2 border rounded text-sm">
+                    <option value="Profesor Jefe">Profesor Jefe</option>
+                    <option value="Docente PIE">Docente PIE</option>
+                    <option value="Psicóloga">Psicóloga</option>
+                    <option value="Inspectoría de Docencia">Inspectoría de Docencia</option>
+                    <option value="Inspectoría General">Inspectoría General</option>
+                    <option value="UTP">UTP</option>
+                </select>
+                <div class="flex gap-2">
+                    <button id="add-btn" disabled class="flex-1 bg-gray-400 text-white font-bold py-3 rounded shadow active:scale-95 transition-all">REGISTRAR</button>
+                    <button id="clear-btn" class="px-4 bg-gray-200 text-gray-700 font-bold rounded hover:bg-gray-300 transition-all">LIMPIAR</button>
                 </div>
             </div>
 
-            <div class="card border-t-4 border-gray-500 flex flex-col h-full">
-                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-2">Historial de Citaciones</h2>
-                <div class="flex-1 overflow-y-auto max-h-[500px] pr-2">
-                    <p id="report-placeholder" class="text-gray-400 italic text-center mt-10 text-sm">Cargando registros...</p>
-                    <table class="w-full text-left text-sm hidden" id="report-table">
-                        <thead class="bg-gray-50 sticky top-0 z-10 text-xs uppercase text-gray-500">
-                            <tr>
-                                <th class="p-2">Fecha Cita</th>
-                                <th class="p-2">Estudiante</th>
-                                <th class="p-2">Motivo</th>
-                                <th class="p-2 text-right"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="report-body" class="divide-y divide-gray-100"></tbody>
+            <div class="card space-y-4 text-center">
+                <h2 class="font-bold text-gray-700 border-b pb-2 text-left">Reportes</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="date" id="filter-date" class="p-2 border rounded text-xs">
+                    <select id="filter-course" class="p-2 border rounded text-xs"><option value="">Todos los Cursos</option></select>
+                </div>
+                <div class="flex gap-2">
+                    <button id="report-btn" class="flex-1 bg-blue-600 text-white text-xs font-bold py-2 rounded hover:bg-blue-700">FILTRAR</button>
+                    <button id="print-screen-btn" class="px-3 bg-gray-800 text-white text-xs font-bold py-2 rounded hover:bg-black">🖨️ TABLA</button>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                        <p class="text-[10px] text-blue-600 font-bold uppercase">Citados</p>
+                        <p id="stat-total" class="text-2xl font-bold text-blue-800">0</p>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded border border-green-100">
+                        <p class="text-[10px] text-green-600 font-bold uppercase">Asistencias</p>
+                        <p id="stat-present" class="text-2xl font-bold text-green-800">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card flex flex-col h-[520px]">
+                <h2 class="font-bold text-gray-700 border-b pb-2 mb-2">Historial y Asistencia</h2>
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full text-sm">
+                        <tbody id="report-body" class="divide-y"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
+    <footer class="mt-8 py-6 text-center border-t border-gray-200 bg-white/50">
+        <p class="text-sm text-gray-600"><strong>Portal Administrativo</strong> • © 2026 Escuela Agrícola Sagrados Corazones</p>
+        <p class="text-xs text-purple-700 mt-1 font-bold">Desarrollado por ProfeAle</p>
+    </footer>
+
     <div id="printable-area" class="hidden"></div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, updateDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // Configuración de Firebase (No modificar)
         const firebaseConfig = { apiKey: "AIzaSyBnSMVCH0yyYUWk5z54kTIPTrWkyoeWs-I", authDomain: "suspenciones-40d0c.firebaseapp.com", projectId: "suspenciones-40d0c", storageBucket: "suspenciones-40d0c.firebasestorage.app", messagingSenderId: "853418739042", appId: "1:853418739042:web:d051befb99cd2acdd4583b" };
-        
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
-        const COLLECTION_NAME = "citaciones";
 
-        // --- NÓMINA DE ALUMNOS 2026 CORREGIDA Y COMPLETA ---
+        const CLIENT_ID = '434804825732-kg1u195e555j7odsvd8gons8njk9u24i.apps.googleusercontent.com';
+        const API_KEY = 'AIzaSyBE2aVDXS6lGH_GqlhBe9a3LbCk2zG7yRU';
+
+        let tokenClient, gapiInited = false, gisInited = false, recordsMemory = [];
+
+        async function initGapi() { 
+            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'] }); 
+            gapiInited = true; check(); 
+        }
+        window.onload = () => { 
+            gapi.load('client', initGapi); 
+            tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: 'https://www.googleapis.com/auth/calendar.events', callback: '' }); 
+            gisInited = true; check(); 
+        };
+        function check() { 
+            if(gapiInited && gisInited) { 
+                const b = document.getElementById('add-btn'); b.disabled = false; b.classList.replace('bg-gray-400', 'bg-purple-600'); 
+                document.getElementById('status-indicator').innerText = "🟢 Conectado";
+                document.getElementById('status-indicator').className = "text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-200";
+            } 
+        }
+
         const schoolData = {
-            'Primero Medio A': [
-                "ÁLVAREZ FAÚNDEZ MATEO VICENTE", "CASTILLO ARAVENA MAITE PASCAL", "COLLADO PUENTES SANTINO ALEXANDER", 
-                "CONCHA TORREALBA JOAQUÍN IGNACIO", "DÍAZ MALUENDA ESTEFANÍA ANTONIA", "DONAIRE ROJAS MAITE EMILIA ESTER", 
-                "ESPINOZA CACHAÑA LISBET ALEXANDRA", "FERRADA ALBORNOZ AGUSTÍN ALEXIS", "FUENTEMAVIDA BARROS OSCAR ANTONIO", 
-                "JAQUE PACHECO DAMIÁN IGNACIO", "JARAMILLO VILLAR MATT HOST", "LÓPEZ ACUÑA MARCO EMILIO", 
-                "LÓPEZ VILLAR FRANCO IGNACIO", "MESA DÍAZ GONZALO IGNACIO", "MEZA CARRASCO CRISTIAN ALFONSO", 
-                "MORALES GARRIDO NICOLÁS ANTONIO", "ORTEGA DA SILVA EMILIA CATALINA SOPHIA", "PEREIRA TAPIA KEVIN RUBÉN", 
-                "RAMÍREZ SEPÚLVEDA LUIS JUSTIN JESÚS", "RAMÍREZ VALDÉS MARTINA POLETTE", "RECABAL YÁÑEZ TOMÁS IGNACIO", 
-                "RODRÍGUEZ SEPÚLVEDA SIMONEY ISAMAR", "ROJAS ÓRDENES TRACY MAIDEN", "SÁNCHEZ MUNIZAGA ALONDRA ANAÍS", 
-                "SOLIZ OLGUIN BRAYAN", "VALENZUELA MUÑOZ MAGDALENA BELÉN"
-            ],
-            'Segundo Medio A': [
-                "ALBURQUENQUE DEL GRECCO EMILYA ANTONIA", "ANABALÓN BELTRÁN BENJAMÍN NICOLÁS", "ARAVENA ZÚÑIGA NOEMÍ JESÚS DE LAS ESTRELLAS", 
-                "ARAYA DOMÍNGUEZ ALEX FABIÁN", "ASTUDILLO CAMPOS CRISTÓBAL ANTONIO", "ASTUDILLO VÁSQUEZ BRUNO FERNANDO LEÓN", 
-                "BAEZ DONOSO LUKAS ALFONSO", "CARO BUSTOS KRISCHNA ESTEFANIA", "CONTRERAS SALGADO HADEEY ALEJANDRA", 
-                "CUMINAO VIDAL CATALINA ANDREA", "DÍAZ MALUENDA MIGUEL ALBERTO", "IBÁÑEZ GONZÁLEZ FERNANDA MAGDALENA", 
-                "KILTAN GONZÁLEZ DIDIER EZEQUIEL", "LAGOS LASTRA ALEXANDRA DANAE", "LÓPEZ LÓPEZ LUCIANO ANTONIO", 
-                "LÓPEZ NOVOA EYDAN DAMIÁN", "MALDONADO FLORES ANTONELLA BELÉN", "MONTECINO DÍAZ VALESKA BELÉN", 
-                "MOYA REYES MATEO ANTONIO BENJAMÍN", "MUÑOZ CONTRERAS LUIS GABRIEL", "MUÑOZ LUNA ROGER JOEL", 
-                "NAVARRO VILLANUEVA KARLA PAZ", "ORELLANA ARRIAGADA SEBASTIÁN ANDRÉS", "OSES CAMPOS VALENTINA ABIGAIL", 
-                "PALMA ORELLANA ANTONELLA FRANCISCA", "PEREIRA ORELLANA MONSERRAT ALAMIRA", "PÉREZ ORMAZÁBAL ZADKA ALEJANDRA", 
-                "PÉREZ QUEVEDO CONSTANZA TRINIDAD", "QUEZADA NARANJO FELIPE ALONSO", "RAMÍREZ VILLALOBOS DUVAN EMILIO", 
-                "RIQUELME SANTOS BENJAMÍN ALONSO", "ROJAS GONZÁLEZ FLORENCIA TRINIDAD", "ROJAS LEIVA EDUARDO JAVIER", 
-                "SALAZAR SALAS PEDRO JOSÉ", "SANTANDER LÓPEZ MARÍA JOSÉ", "TAPIA CASTILLA JEANFRANCO PATRICK", 
-                "URBINA CÁCERES FRANCHESCA POULETTE", "VARGAS MORAGA MARTINA SAYEN", "VÁSQUEZ AGUILERA SCARLET NICOLE", 
-                "VÁSQUEZ ZALDUENDO AMANDA ISABEL", "VERA BRAVO FLORENCIA ANTONIA", "YÁÑEZ GONZÁLEZ BRAYAN DAMIÁN", 
-                "ZABALAGA COFRÉ DAMIÁN ANDRÉS"
-            ],
-            'Tercero Medio A': [
-                "AHUMADA ROJAS TRINIDAD BELÉN", "CORNEJO CASTILLO OSCAR GABRIEL", "ESPINOZA PEÑALILLO BRAYAN JESÚS", 
-                "FAÚNDEZ NORAMBUENA ALEJANDRO ANTONIO", "JARAMILLO VILLAR EMILIO SCOTT", "LÓPEZ VILLAR MARTÍN ALONSO", 
-                "MEZA COLIMÁN ANGEL BLAS", "MIRANDA MUÑOZ ALEXANDRA JAVIERA", "MORAGA PACHECO RENATO IGNACIO", 
-                "MORALES REIMÁN ALFONSO TOMÁS", "ORELLANA GARRIDO MATÍAS LEANDRO", "PEREIRA HORMAZÁBAL MAXIMILIANO EDUARDO", 
-                "PINTO TOBAR JORDÁN AMARO", "RECABAL YÁÑEZ KEVIN ANDRÉS", "SANDOVAL CERPA VICENTE ESTEBAN", 
-                "SOTO NARANJO CHRISTOPHER", "VEKARIC VERDEJO MARTÍN", "VIELMA ZABALAGA JOAN MANUEL"
-            ],
-            'Tercero Medio C': [
-                "BRAVO MENARES ALEX JOHAN", "CARRASCO LEIVA BENJAMÍN IGNACIO", "ENCINA PIZARRO DIEGO BENJAMÍN ALEXANDER", 
-                "ESPINOSA TORRES FERNANDA ELENA", "GONZÁLEZ SALAZAR EMILIA CATALINA", "MEDEL OJEDA LEÓN IGNACIO", 
-                "OLIVARES VALENZUELA ALONSO IGNACIO", "OLIVARES VALENZUELA ANTONELLA DANAE IGNACIA", "PUNOY MEDEL MILLARAY ANGÉLICA", 
-                "QUIÑENAO MUÑOZ CRISTÓBAL PATRICIO", "RIQUELME CASTILLO MATÍAS EDUARDO ANTONIO", "RIQUELME COLOMA DALIA CONSTANZA", 
-                "RIVERA ABARZA CONSTANZA VICTORIA", "SAAVEDRA BRAVO FLORENCIA ALEJANDRA", "SALGADO ROJAS VICENTE MOISÉS", 
-                "SANTIS CASSEUS TEIVA SCARLETT", "SOBARZO YÉVENES KATHERINNE ALEXIA BELÉN", "TOLEDO ALBORNOZ ANTONELLA INES", 
-                "VENEGAS ARRIAGADA ANTONIA EDITH"
-            ],
-            'Cuarto Medio A': [
-                "ALCÁNTAR GARCÍA MARTINA ALEJANDRA", "BAHAMONDE MUÑOZ ARIEL LEON", "CAMPOS MUÑOZ CRISTOPHER JESÚS", 
-                "CANCINO ORÓSTICA VICENTE GASPAR", "CARO URRUTIA CONSUELO ANTONIA", "CARRASCO GONZÁLEZ CAMILA ANDREA", 
-                "COFRÉ CASTILLO ANTONIO ANDRÉS", "GALDAMES VERGARA FELIPE ESTEBAN", "GARCÍA GONZÁLEZ SANTIAGO HUMBERTO", 
-                "GONZÁLEZ AMIGO FRANCISCA IGNACIA", "GONZÁLEZ SALAZAR JOAQUÍN ALONSO", "GUTIÉRREZ GUTIÉRREZ ANGEL MARTÍN", 
-                "HERNÁNDEZ SEPÚLVEDA VICENTE ALEJANDRO", "LOBOS CÁCERES ANTONIA PAZ", "MARTÍNEZ LIZANA AARON ALEJANDRO", 
-                "MEZA CARRASCO BENJAMÍN INTI", "MIÑO GONZALEZ CATALINA ANDREA", "PÉREZ CORÓN MANUEL IGNACIO", 
-                "SAMANIEGO CORTEZ JAKSON FERGIE", "SEPÚLVEDA SALAZAR SOFÍA ANTONIA", "TAPIA ACUÑA GABRIEL ANTONIO", 
-                "TORREALBA MOYA FLORVELIS DE LOS ANGELES", "VEGA VIVANCO CRISTÓBAL ANTONIO", "VERA NAVARRETE DANIELA ELIZABETH", 
-                "VILLALOBOS ARAVENA KARINA ANGELINA", "VILLALOBOS VILLALOBOS SAMIR LUCIAN JESÚS"
-            ],
-            'Cuarto Medio C': [
-                "ARELLANO ACUÑA MARTÍN ANTONIO", "AROS ÁVILA DAYANA IGNACIA", "CABRERA COLOMBINO MARÍA GRACIA", 
-                "COLLAO MEDINA ANAÍS VALENTINA", "DE LA HOZ VALENZUELA FRANCO SEBASTIÁN", "FUENTES CARRASCO YARIXA ALEJANDRA", 
-                "GÓMEZ CANCINO DANIELA ALEJANDRA", "GUTIÉRREZ CARRIÓN MILLARAY CAROLINA", "HONORATO TAPIA GLORIA JAVIERA", 
-                "LARA RIVERA BENJAMÍN ESTEBAN", "PALACIOS SOTO JOSÉ TOMÁS", "PEZO SANTANDER JOSÉ CRISTÓBAL", 
-                "ROCHA ROJAS JOSÉ PABLO WILLIAMS", "ROJAS YÉVENES FABIANA ISIDORA", "SÁNCHEZ PAREJA ANDY ANTONIO", 
-                "SANTANDER LÓPEZ SIMÓN ESTEBAN", "TRONCOSO LIZAMA SIOMARA IGNACIA", "WARNKEN ROJAS LUCIANA BERNABELA"
-            ]
+            'Primero Medio A': ["ÁLVAREZ FAÚNDEZ MATEO VICENTE", "CASTILLO ARAVENA MAITE PASCAL", "COLLADO PUENTES SANTINO ALEXANDER", "CONCHA TORREALBA JOAQUÍN IGNACIO", "DÍAZ MALUENDA ESTEFANÍA ANTONIA", "DONAIRE ROJAS MAITE EMILIA ESTER", "ESPINOZA CACHAÑA LISBET ALEXANDRA", "FERRADA ALBORNOZ AGUSTÍN ALEXIS", "FUENTEMAVIDA BARROS OSCAR ANTONIO", "JAQUE PACHECO DAMIÁN IGNACIO", "JARAMILLO VILLAR MATT HOST", "LÓPEZ ACUÑA MARCO EMILIO", "LÓPEZ VILLAR FRANCO IGNACIO", "MESA DÍAZ GONZALO IGNACIO", "MEZA CARRASCO CRISTIAN ALFONSO", "MORALES GARRIDO NICOLÁS ANTONIO", "ORTEGA DA SILVA EMILIA CATALINA SOPHIA", "PEREIRA TAPIA KEVIN RUBÉN", "RAMÍREZ SEPÚLVEDA LUIS JUSTIN JESÚS", "RAMÍREZ VALDÉS MARTINA POLETTE", "RECABAL YÁÑEZ TOMÁS IGNACIO", "RODRÍGUEZ SEPÚLVEDA SIMONEY ISAMAR", "ROJAS ÓRDENES TRACY MAIDEN", "SÁNCHEZ MUNIZAGA ALONDRA ANAÍS", "SOLIZ OLGUIN BRAYAN", "VALENZUELA MUÑOZ MAGDALENA BELÉN"],
+            'Segundo Medio A': ["ALBURQUENQUE DEL GRECCO EMILYA ANTONIA", "ANABALÓN BELTRÁN BENJAMÍN NICOLÁS", "ARAVENA ZÚÑIGA NOEMÍ JESÚS", "ARAYA DOMÍNGUEZ ALEX FABIÁN", "ASTUDILLO CAMPOS CRISTÓBAL ANTONIO", "BAEZ DONOSO LUKAS ALFONSO", "CARO BUSTOS KRISCHNA ESTEFANIA", "CUMINAO VIDAL CATALINA ANDREA", "DÍAZ MALUENDA MIGUEL ALBERTO", "IBÁÑEZ GONZÁLEZ FERNANDA MAGDALENA", "LAGOS LASTRA ALEXANDRA DANAE", "LÓPEZ NOVOA EYDAN DAMIÁN", "MALDONADO FLORES ANTONELLA BELÉN", "MONTECINO DÍAZ VALESKA BELÉN", "MUÑOZ CONTRERAS LUIS GABRIEL", "OSES CAMPOS VALENTINA ABIGAIL", "PALMA ORELLANA ANTONELLA FRANCISCA", "PÉREZ QUEVEDO CONSTANZA TRINIDAD", "RIQUELME SANTOS BENJAMÍN ALONSO", "ROJAS LEIVA EDUARDO JAVIER", "SALAZAR SALAS PEDRO JOSÉ", "SANTANDER LÓPEZ MARÍA JOSÉ", "VÁSQUEZ AGUILERA SCARLET NICOLE", "VERA BRAVO FLORENCIA ANTONIA", "YÁÑEZ GONZÁLEZ BRAYAN DAMIÁN"],
+            'Tercero Medio A': ["AHUMADA ROJAS TRINIDAD BELÉN", "CORNEJO CASTILLO OSCAR GABRIEL", "ESPINOZA PEÑALILLO BRAYAN JESÚS", "FAÚNDEZ NORAMBUENA ALEJANDRO ANTONIO", "JARAMILLO VILLAR EMILIO SCOTT", "LÓPEZ VILLAR MARTÍN ALONSO", "MEZA COLIMÁN ANGEL BLAS", "MIRANDA MUÑOZ ALEXANDRA JAVIERA", "MORAGA PACHECO RENATO IGNACIO", "MORALES REIMÁN ALFONSO TOMÁS", "ORELLANA GARRIDO MATÍAS LEANDRO", "PEREIRA HORMAZÁBAL MAXIMILIANO EDUARDO", "PINTO TOBAR JORDÁN AMARO", "RECABAL YÁÑEZ KEVIN ANDRÉS", "SANDOVAL CERPA VICENTE ESTEBAN", "SOTO NARANJO CHRISTOPHER", "VEKARIC VERDEJO MARTÍN", "VIELMA ZABALAGA JOAN MANUEL"],
+            'Tercero Medio C': ["BRAVO MENARES ALEX JOHAN", "CARRASCO LEIVA BENJAMÍN IGNACIO", "ENCINA PIZARRO DIEGO BENJAMÍN", "ESPINOSA TORRES FERNANDA ELENA", "GONZÁLEZ SALAZAR EMILIA CATALINA", "MEDEL OJEDA LEÓN IGNACIO", "OLIVARES VALENZUELA ALONSO IGNACIO", "PUNOY MEDEL MILLARAY ANGÉLICA", "QUIÑENAO MUÑOZ CRISTÓBAL PATRICIO", "RIQUELME CASTILLO MATÍAS EDUARDO", "RIQUELME COLOMA DALIA CONSTANZA", "RIVERA ABARZA CONSTANZA VICTORIA", "SAAVEDRA BRAVO FLORENCIA ALEJANDRA", "SALGADO ROJAS VICENTE MOISÉS", "SANTIS CASSEUS TEIVA SCARLETT", "SOBARZO YÉVENES KATHERINNE ALEXIA", "TOLEDO ALBORNOZ ANTONELLA INES", "VENEGAS ARRIAGADA ANTONIA EDITH"],
+            'Cuarto Medio A': ["ALCÁNTAR GARCÍA MARTINA ALEJANDRA", "BAHAMONDE MUÑOZ ARIEL LEON", "CAMPOS MUÑOZ CRISTOPHER JESÚS", "CANCINO ORÓSTICA VICENTE GASPAR", "CARO URRUTIA CONSUELO ANTONIA", "CARRASCO GONZÁLEZ CAMILA ANDREA", "COFRÉ CASTILLO ANTONIO ANDRÉS", "GALDAMES VERGARA FELIPE ESTEBAN", "GARCÍA GONZÁLEZ SANTIAGO HUMBERTO", "GONZÁLEZ AMIGO FRANCISCA IGNACIA", "GONZÁLEZ SALAZAR JOAQUÍN ALONSO", "GUTIÉRREZ GUTIÉRREZ ANGEL MARTÍN", "HERNÁNDEZ SEPÚLVEDA VICENTE ALEJANDRO", "LOBOS CÁCERES ANTONIA PAZ", "MARTÍNEZ LIZANA AARON ALEJANDRO", "MEZA CARRASCO BENJAMÍN INTI", "MIÑO GONZALEZ CATALINA ANDREA", "PÉREZ CORÓN MANUEL IGNACIO", "SAMANIEGO CORTEZ JAKSON FERGIE", "SEPÚLVEDA SALAZAR SOFÍA ANTONIA", "TAPIA ACUÑA GABRIEL ANTONIO", "TORREALBA MOYA FLORVELIS", "VEGA VIVANCO CRISTÓBAL ANTONIO", "VERA NAVARRETE DANIELA ELIZABETH", "VILLALOBOS ARAVENA KARINA ANGELINA", "VILLALOBOS VILLALOBOS SAMIR LUCIAN"],
+            'Cuarto Medio C': ["ARELLANO ACUÑA MARTÍN ANTONIO", "AROS ÁVILA DAYANA IGNACIA", "CABRERA COLOMBINO MARÍA GRACIA", "COLLAO MEDINA ANAÍS VALENTINA", "DE LA HOZ VALENZUELA FRANCO SEBASTIÁN", "FUENTES CARRASCO YARIXA ALEJANDRA", "GÓMEZ CANCINO DANIELA ALEJANDRA", "GUTIÉRREZ CARRIÓN MILLARAY CAROLINA", "HONORATO TAPIA GLORIA JAVIERA", "LARA RIVERA BENJAMÍN ESTEBAN", "PALACIOS SOTO JOSÉ TOMÁS", "PEZO SANTANDER JOSÉ CRISTÓBAL", "ROCHA ROJAS JOSÉ PABLO WILLIAMS", "ROJAS YÉVENES FABIANA ISIDORA", "SÁNCHEZ PAREJA ANDY ANTONIO", "SANTANDER LÓPEZ SIMÓN ESTEBAN", "TRONCOSO LIZAMA SIOMARA IGNACIA", "WARNKEN ROJAS LUCIANA BERNABELA"]
         };
 
-        const courseSelect = document.getElementById('course-select');
-        const studentSelect = document.getElementById('student-select');
-        let studentsToPrint = [];
-        let allCitations = [];
+        const cS = document.getElementById('course-select'), sS = document.getElementById('student-select'), fC = document.getElementById('filter-course');
+        cS.innerHTML = '<option value="">Seleccione Curso...</option>';
+        Object.keys(schoolData).forEach(c => { cS.innerHTML += `<option value="${c}">${c}</option>`; fC.innerHTML += `<option value="${c}">${c}</option>`; });
+        cS.onchange = () => { sS.innerHTML = '<option>Seleccione Alumno...</option>'; if(schoolData[cS.value]) { schoolData[cS.value].forEach(s => sS.innerHTML += `<option value="${s}">${s}</option>`); sS.disabled = false; } };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar Auth anónimo
-            signInAnonymously(auth).then(() => {
-                console.log("Conectado a Firebase");
-                listenData();
-            }).catch((error) => {
-                console.error("Error Auth:", error);
-                showToast("Error de conexión");
-            });
+        document.getElementById('clear-btn').onclick = () => { document.querySelectorAll('input, select').forEach(el => { if(el.id !== 'course-select' && el.id !== 'student-select') el.value = ''; }); showToast("Campos limpiados"); };
 
-            // Llenar select de cursos
-            courseSelect.innerHTML = '<option value="">Selecciona un curso</option>';
-            for (const course in schoolData) {
-                const opt = document.createElement('option'); 
-                opt.value = course; 
-                opt.textContent = course;
-                courseSelect.appendChild(opt);
-            }
-            
-            // Fecha por defecto (mañana)
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('citation-date').value = tomorrow.toISOString().split('T')[0];
-        });
+        document.getElementById('add-btn').onclick = async () => {
+            const d = { course: cS.value, student: sS.value, date: document.getElementById('citation-date').value, time: document.getElementById('citation-time').value, teacher: document.getElementById('teacher-input').value, assisted: false, timestamp: Date.now() };
+            if(!d.student || !d.date) return alert("Faltan datos");
 
-        // Evento cambio de curso
-        courseSelect.addEventListener('change', () => {
-            const sel = courseSelect.value;
-            studentSelect.innerHTML = '<option value="">Selecciona un alumno(a)</option>';
-            
-            if (sel && schoolData[sel]) {
-                studentSelect.disabled = false;
-                schoolData[sel].forEach(st => {
-                    const opt = document.createElement('option'); 
-                    opt.value = st; 
-                    opt.textContent = st; 
-                    studentSelect.appendChild(opt);
-                });
-            } else {
-                studentSelect.disabled = true;
-            }
-        });
-
-        // Escuchar datos en tiempo real
-        function listenData() {
-            const q = collection(db, COLLECTION_NAME);
-            onSnapshot(q, (snapshot) => {
-                allCitations = [];
-                snapshot.forEach((doc) => { 
-                    allCitations.push({ id: doc.id, ...doc.data() }); 
-                });
-                
-                // Ordenar por fecha (más reciente primero)
-                allCitations.sort((a,b) => {
-                    const tA = a.timestamp || '';
-                    const tB = b.timestamp || '';
-                    return tB.localeCompare(tA);
-                });
-                
-                renderReport();
-            });
-        }
-
-        // Agregar a la cola de impresión
-        document.getElementById('add-to-print-list-btn').addEventListener('click', async () => {
-            const course = courseSelect.value;
-            const student = studentSelect.value;
-            const date = document.getElementById('citation-date').value;
-            const time = document.getElementById('citation-time').value;
-            const reason = document.getElementById('reason-select').value;
-            const mode = document.getElementById('mode-select').value;
-            const teacher = document.getElementById('teacher-input').value; 
-            const obs = document.getElementById('obs-input').value.trim();
-
-            if (!course || !student || !date || !time || !teacher) return showToast('Faltan datos obligatorios.');
-
-            const now = new Date();
-            const record = {
-                course, student, citationDate: date, citationTime: time, reason, mode, teacher, obs,
-                timestamp: now.toISOString(),
-                createdAt: now.toLocaleString('es-CL')
+            tokenClient.callback = async (resp) => {
+                if (resp.error) return;
+                try {
+                    await gapi.client.calendar.events.insert({ 'calendarId': 'primary', 'resource': { 'summary': `Cita: ${d.student}`, 'start': { 'dateTime': `${d.date}T${d.time}:00`, 'timeZone': 'America/Santiago' }, 'end': { 'dateTime': `${d.date}T${d.time}:30`, 'timeZone': 'America/Santiago' } } });
+                    await addDoc(collection(db, "citaciones"), d);
+                    showToast("✅ Registrado");
+                    generateVoucher(d);
+                } catch (e) { console.error(e); }
             };
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        };
 
-            try {
-                // Guardar en Firebase
-                await addDoc(collection(db, COLLECTION_NAME), record);
-                
-                // Agregar a lista local de impresión
-                studentsToPrint.push(record);
-                renderStudentsToPrint();
-                
-                // Resetear selección de alumno
-                studentSelect.value = '';
-                showToast('✅ Citación generada correctamente.');
-            } catch (e) {
-                console.error(e);
-                showToast('Error al guardar en la nube.');
-            }
+        window.reprint = (idx) => generateVoucher(recordsMemory[idx]);
+
+        function generateVoucher(d) {
+            // Generamos dos copias en el printable-area
+            document.getElementById('printable-area').innerHTML = `
+                <div class="citation-wrapper">
+                    <div class="citation-card">
+                        <div class="card-body">
+                            <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
+                                <img src="logo.jpg" style="height:60px;">
+                                <div><h2 class="header-title">CITACIÓN</h2><p class="school-name">E. Agrícola Sagrados Corazones</p></div>
+                            </div>
+                            <p class="data-label">Alumno(a) y Curso:</p><p class="data-value"><b>${d.student}</b> — ${d.course}</p>
+                            <p class="data-label">Fecha y Hora:</p><p class="data-value">📅 ${d.date} — ⏰ ${d.time}</p>
+                            <p class="data-label">Solicita:</p><p class="data-value">👤 ${d.teacher}</p>
+                        </div>
+                        <div class="card-side"><p style="font-size:10px; font-weight:800; color:#4c1d95;">TOMA DE CONOCIMIENTO</p><div class="signature-line">FIRMA APODERADO</div></div>
+                        <div class="print-footer-credit">Desarrollado por ProfeAle</div>
+                    </div>
+                </div>
+                <div class="citation-wrapper">
+                    <div class="citation-card">
+                        <div class="card-body">
+                            <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
+                                <img src="logo.jpg" style="height:60px;">
+                                <div><h2 class="header-title">CITACIÓN</h2><p class="school-name">E. Agrícola Sagrados Corazones</p></div>
+                            </div>
+                            <p class="data-label">Alumno(a) y Curso:</p><p class="data-value"><b>${d.student}</b> — ${d.course}</p>
+                            <p class="data-label">Fecha y Hora:</p><p class="data-value">📅 ${d.date} — ⏰ ${d.time}</p>
+                            <p class="data-label">Solicita:</p><p class="data-value">👤 ${d.teacher}</p>
+                        </div>
+                        <div class="card-side"><p style="font-size:10px; font-weight:800; color:#4c1d95;">TOMA DE CONOCIMIENTO</p><div class="signature-line">FIRMA APODERADO</div></div>
+                        <div class="print-footer-credit">Desarrollado por ProfeAle</div>
+                    </div>
+                </div>`;
+            setTimeout(() => { window.print(); }, 800);
+        }
+
+        onSnapshot(query(collection(db, "citaciones"), orderBy('timestamp', 'desc'), limit(15)), (s) => {
+            const b = document.getElementById('report-body'); b.innerHTML = ''; recordsMemory = []; let count = 0;
+            s.forEach(snap => { const i = snap.data(); recordsMemory.push(i); b.innerHTML += `<tr class="border-b"><td class="p-2 text-[10px] font-bold">${i.date}</td><td class="p-2 text-[11px]">${i.student}<br><span class="text-purple-600 text-[9px] font-bold">${i.course}</span></td><td class="p-2 text-right flex gap-1 justify-end"><button onclick="toggleAsist('${snap.id}', ${i.assisted})" class="${i.assisted ? 'bg-green-500' : 'bg-gray-300'} text-white text-[9px] px-2 py-1 rounded">MARCAR</button><button onclick="reprint(${count})" class="bg-blue-500 text-white text-[9px] px-2 py-1 rounded">🖨️</button></td></tr>`; count++; });
         });
 
-        function renderStudentsToPrint() {
-            const list = document.getElementById('print-list');
-            const container = document.getElementById('print-list-container');
-            list.innerHTML = '';
-            
-            if (studentsToPrint.length > 0) {
-                container.classList.remove('hidden');
-                studentsToPrint.forEach((a, idx) => {
-                    list.innerHTML += `<li class="flex justify-between border-b pb-1 bg-white p-2 rounded shadow-sm mb-1">
-                        <div>
-                            <span class="font-bold block text-purple-800">${a.student}</span>
-                            <span class="text-xs text-gray-500">${a.citationDate} ${a.citationTime} - ${a.reason}</span>
-                        </div>
-                        <button class="text-red-500 font-bold px-2 hover:bg-red-50 rounded" onclick="window.removeFromPrint(${idx})">×</button>
-                    </li>`;
-                });
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-
-        // Funciones globales para botones dinámicos
-        window.removeFromPrint = (idx) => { studentsToPrint.splice(idx, 1); renderStudentsToPrint(); };
-        document.getElementById('clear-print-list-btn').onclick = () => { studentsToPrint = []; renderStudentsToPrint(); };
-
-        // Imprimir Colillas
-        document.getElementById('print-collective-btn').onclick = () => {
-            if(studentsToPrint.length === 0) return;
-            const printable = document.getElementById('printable-area');
-            printable.innerHTML = ''; 
-
-            studentsToPrint.forEach(s => {
-                const [y, m, d] = s.citationDate.split('-');
-                const datePretty = `${d}/${m}/${y}`;
-
-                const card = document.createElement('div');
-                card.className = 'citation-slip';
-                card.innerHTML = `
-                    <div class="slip-left">
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; border-bottom:1px solid #000; padding-bottom:5px;">
-                            <img src="logo.jpg" style="height:40px;" onerror="this.style.display='none'">
-                            <div>
-                                <h3 style="margin:0; font-size:14px; font-weight:bold; text-transform:uppercase;">Citación de Apoderado</h3>
-                                <p style="margin:0; font-size:10px;">Escuela Agrícola Sagrados Corazones</p>
-                            </div>
-                        </div>
-                        
-                        <p style="font-size:12px; text-align:justify; margin-bottom:8px;">
-                            Estimado Apoderado, se cita a usted a una entrevista escolar relacionada con su pupilo 
-                            <strong>${s.student}</strong> del curso <strong>${s.course}</strong>.
-                        </p>
-
-                        <div style="background:#f3f4f6; padding:10px; border:1px solid #ddd; font-size:11px;">
-                            <p style="margin:2px 0;"><strong>📅 Fecha:</strong> ${datePretty} &nbsp;&nbsp; <strong>⏰ Hora:</strong> ${s.citationTime}</p>
-                            <p style="margin:2px 0;"><strong>📍 Modalidad:</strong> ${s.mode}</p>
-                            <p style="margin:2px 0;"><strong>📋 Motivo:</strong> ${s.reason}</p>
-                            <p style="margin:2px 0;"><strong>👤 Solicita:</strong> ${s.teacher}</p>
-                            ${s.obs ? `<p style="margin:2px 0; font-style:italic;">Nota: ${s.obs}</p>` : ''}
-                        </div>
-                        
-                        <p style="font-size:10px; margin-top:5px; text-align:center;">Se ruega asistencia y puntualidad.</p>
-                    </div>
-
-                    <div class="slip-right">
-                        <div>
-                            <p style="font-size:10px; font-weight:bold; text-decoration:underline;">TOMA DE CONOCIMIENTO</p>
-                        </div>
-                        
-                        <div style="border-bottom:1px solid #000; height:40px; margin-bottom:5px;"></div>
-                        <p style="font-size:9px;">Firma Apoderado</p>
-
-                        <div style="border-bottom:1px solid #000; height:30px; margin-bottom:5px;"></div>
-                        <p style="font-size:9px;">Firma Alumno</p>
-                    </div>
-                `;
-                printable.appendChild(card);
-            });
-
-            window.print();
-            studentsToPrint = []; 
-            renderStudentsToPrint();
-        };
-
-        // Imprimir Reporte Diario
-        document.getElementById('print-report-btn').onclick = () => {
-            if(allCitations.length === 0) return showToast('No hay registros.');
-
-            const printable = document.getElementById('printable-area');
-            printable.innerHTML = `
-                <div style="width:100%;">
-                    <h2 style="text-align:center; margin-bottom:10px; font-size:18px;">REPORTE DE CITACIONES</h2>
-                    <p style="text-align:center; font-size:12px; margin-bottom:20px;">Fecha Emisión: ${new Date().toLocaleDateString()} | Total: ${allCitations.length}</p>
-                    <table style="width:100%; border-collapse:collapse; font-size:11px; page-break-inside: auto;">
-                        <thead style="display: table-header-group;">
-                            <tr style="background:#eee;">
-                                <th style="border:1px solid #999; padding:6px; text-align:left;">Fecha Cita</th>
-                                <th style="border:1px solid #999; padding:6px; text-align:left;">Estudiante</th>
-                                <th style="border:1px solid #999; padding:6px; text-align:left;">Motivo / Profesor</th>
-                                <th style="border:1px solid #999; padding:6px; text-align:left;">Modalidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${allCitations.map(a => `
-                                <tr style="page-break-inside: avoid; page-break-after: auto;">
-                                    <td style="border:1px solid #999; padding:6px;">${a.citationDate} ${a.citationTime}</td>
-                                    <td style="border:1px solid #999; padding:6px;"><b>${a.student}</b><br>${a.course}</td>
-                                    <td style="border:1px solid #999; padding:6px;">${a.reason}<br><span style="color:#666;">Prof: ${a.teacher}</span></td>
-                                    <td style="border:1px solid #999; padding:6px;">${a.mode}</td>
-                                </tr>`).join('')}
-                        </tbody>
-                    </table>
-                    <div style="margin-top:20px; text-align:right; font-size:10px; color:#666;">Generado por ProfeAle System</div>
-                </div>
-            `;
-            
-            const style = document.createElement('style');
-            style.innerHTML = `@page { size: Letter; margin: 1cm; } #printable-area { display: block !important; position: relative !important; } .citation-slip { display: none; }`;
-            document.head.appendChild(style);
-            window.print();
-            setTimeout(() => document.head.removeChild(style), 1000);
-        };
-
-        function renderReport() {
-            const tbody = document.getElementById('report-body');
-            const table = document.getElementById('report-table');
-            const placeholder = document.getElementById('report-placeholder');
-            tbody.innerHTML = '';
-            const displayData = allCitations.slice(0, 15);
-
-            if (displayData.length > 0) {
-                placeholder.classList.add('hidden');
-                table.classList.remove('hidden');
-                displayData.forEach((a) => {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-2 border-b text-xs text-gray-500">${a.citationDate}<br>${a.citationTime}</td>
-                            <td class="p-2 border-b"><div class="font-bold text-gray-700 text-xs">${a.student}</div><div class="text-[10px] text-purple-600">${a.course}</div></td>
-                            <td class="p-2 border-b text-xs"><div class="font-bold">${a.reason}</div><div class="text-[10px] text-gray-500">${a.teacher}</div></td>
-                            <td class="p-2 border-b text-right"><button onclick="window.deleteItem('${a.id}')" class="text-red-500 text-xs hover:bg-red-50 p-1 rounded">🗑️</button></td>
-                        </tr>`;
-                });
-            } else { placeholder.classList.remove('hidden'); table.classList.add('hidden'); }
-        }
-
-        window.deleteItem = async (id) => { if(confirm('¿Eliminar este registro de la nube?')) { try { await deleteDoc(doc(db, COLLECTION_NAME, id)); showToast('Registro eliminado.'); } catch(e) { showToast('Error al eliminar.'); } } };
-        document.getElementById('clear-data-btn').onclick = () => alert("Esta función solo limpia la vista local. Para eliminar registros, usa el botón de eliminar individual.");
-        function showToast(msg) { const box = document.getElementById('message-box'); box.innerText = msg; box.classList.remove('hidden'); setTimeout(() => box.classList.add('hidden'), 3000); }
-        window.removeFromPrint = removeFromPrint; window.deleteItem = deleteItem;
+        window.toggleAsist = async (id, current) => { await updateDoc(doc(db, "citaciones", id), { assisted: !current }); showToast("Estado actualizado"); };
+        function showToast(m) { const b = document.getElementById('message-box'); b.innerText = m; b.classList.remove('hidden'); setTimeout(() => b.classList.add('hidden'), 3000); }
     </script>
 </body>
 </html>
